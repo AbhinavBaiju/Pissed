@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Your Clips</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            zinc: {
+              950: '#09090b',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    }
+  
+  function toggleUpload(isUpload) {
+    const uploadSection = document.getElementById('uploadSection');
+    const pasteLinkSection = document.getElementById('pasteLinkSection');
+    const uploadButton = document.getElementById('uploadButton');
+    const pasteLinkButton = document.getElementById('pasteLinkButton');
+
+    if (isUpload) {
+      uploadSection.classList.remove('hidden');
+      pasteLinkSection.classList.add('hidden');
+      uploadButton.classList.remove('bg-neutral-200', 'text-black');
+      uploadButton.classList.add('bg-red-600', 'text-white');
+      pasteLinkButton.classList.remove('bg-red-600', 'text-white');
+      pasteLinkButton.classList.add('bg-neutral-200', 'text-black');
+    } else {
+      uploadSection.classList.add('hidden');
+      pasteLinkSection.classList.remove('hidden');
+      uploadButton.classList.remove('bg-red-600', 'text-white');
+      uploadButton.classList.add('bg-neutral-200', 'text-black');
+      pasteLinkButton.classList.remove('bg-neutral-200', 'text-black');
+      pasteLinkButton.classList.add('bg-red-600', 'text-white');
+    }
+  }
+
+  function toggleOption(buttonGroup, selectedButton) {
+    const buttons = buttonGroup.querySelectorAll('button');
+    buttons.forEach(button => {
+      if (button === selectedButton) {
+        button.classList.remove('bg-white', 'text-black', 'border-neutral-200');
+        button.classList.add('bg-red-600', 'text-white', 'border-red-600');
+      } else {
+        button.classList.remove('bg-red-600', 'text-white', 'border-red-600');
+        button.classList.add('bg-white', 'text-black', 'border-neutral-200');
+      }
+    });
+
+    // Handle description toggle
+    if (buttonGroup.id === 'descriptionToggle') {
+      const descriptionInformationSection = document.getElementById('descriptionInformationSection');
+      if (selectedButton.textContent.trim() === 'Yes') {
+        descriptionInformationSection.classList.remove('hidden');
+      } else {
+        descriptionInformationSection.classList.add('hidden');
+      }
+    }
+
+    // Handle credit toggle
+    if (buttonGroup.id === 'creditToggle') {
+      const creditInformationSection = document.getElementById('creditInformationSection');
+      if (selectedButton.textContent.trim() === 'No') {
+        creditInformationSection.classList.add('hidden');
+      } else {
+        creditInformationSection.classList.remove('hidden');
+      }
+    }
+
+    // Handle recording toggle
+    if (buttonGroup.id === 'recordingToggle') {
+      const recordingInformationSection = document.getElementById('recordingInformationSection');
+      if (selectedButton.textContent.trim() === 'No') {
+        recordingInformationSection.classList.remove('hidden');
+      } else {
+        recordingInformationSection.classList.add('hidden');
+      }
+    }
+  }
+
+  // Initialize sections
+  document.addEventListener('DOMContentLoaded', function() {
+    const creditInformationSection = document.getElementById('creditInformationSection');
+    const recordingInformationSection = document.getElementById('recordingInformationSection');
+    const descriptionInformationSection = document.getElementById('descriptionInformationSection');
+    
+    creditInformationSection.classList.remove('hidden');
+    recordingInformationSection.classList.add('hidden');
+    descriptionInformationSection.classList.add('hidden');
+  });
+
+  function updateFileName(input) {
+  const fileNameDisplay = document.getElementById('fileName');
+  if (input.files.length > 0) {
+    fileNameDisplay.textContent = `Selected file: ${input.files[0].name}`;
+  } else {
+    fileNameDisplay.textContent = '';
+  }
+}
+
+  function updateCheckboxState(checkboxId, isChecked) {
+    const stateDisplay = document.getElementById(checkboxId + 'State');
+    stateDisplay.textContent = isChecked ? 'Checked' : 'Unchecked';
+  }
+
+</script>
+</head>
+<body class="min-h-screen bg-zinc-950">
+  <div class=" flex flex-col items-center w-full max-w-4xl mx-auto p-4 gap-2">
+    <!-- Header Section -->
+    <header class="w-full max-w-md px-6 py-5 bg-zinc-950 flex flex-col items-center gap-4">
+      <a href="index.html">
+        <img src="assets/logo.png" alt="Pissed Logo" class="h-7 mb-1">
+      </a>
+      <h1 class="text-2xl sm:text-4xl font-bold text-white uppercase tracking-wide">Submit your clips</h1>
+      <p class="w-full sm:w-80 text-center text-white text-base sm:text-lg font-bold leading-relaxed tracking-wide">
+        Your clip will be submitted to Pissed and could be posted on our account
+      </p>
+    </header>
+
+    <!-- Main Form Section -->
+    <main class="w-full max-w-md p-6 sm:p-8 bg-white rounded-lg">
+      <form action="https://submit-form.com/mXwtNiMXd" method="POST" class="flex flex-col gap-4">
+        <!-- Name Fields -->
+        <div class="flex flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">First Name *</label>
+            <input 
+              type="text" 
+              name="first_name" 
+              required
+              class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+              placeholder="John"
+            >
+          </div>
+          <div class="flex-1">
+            <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Last Name *</label>
+            <input 
+              type="text" 
+              name="last_name" 
+              required
+              class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+              placeholder="Doe"
+            >
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Email *</label>
+          <input 
+            type="email" 
+            name="email" 
+            required
+            placeholder="example@gmail.com"
+            class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+          >
+        </div>
+
+        <!-- Upload Options -->
+        <div class="flex justify-center items-center gap-4">
+          <button 
+            id="uploadButton" 
+            type="button" 
+            onclick="toggleUpload(true)" 
+            class="flex-1 h-12 bg-red-600 text-white font-bold rounded-md text-base tracking-wide hover:bg-red-700 transition-colors"
+          >
+            Upload
+          </button>
+          <span class="text-zinc-600 font-bold text-base">or</span>
+          <button 
+            id="pasteLinkButton" 
+            type="button" 
+            onclick="toggleUpload(false)" 
+            class="flex-1 h-12 bg-neutral-200 text-black font-bold rounded-md text-base tracking-wide hover:bg-neutral-300 transition-colors"
+          >
+            Paste Link
+          </button>
+        </div>
+
+        <!-- Clip Selection -->
+        <div class="w-full p-6 bg-neutral-200 rounded-md flex flex-col items-center gap-4">
+          <!-- Upload Section -->
+<div id="uploadSection" class="flex flex-col items-center gap-4">
+  <button 
+    type="button" 
+    onclick="document.getElementById('videoUpload').click();"
+    class="w-44 h-12 bg-white rounded-md font-bold text-base tracking-wide hover:bg-neutral-50 transition-colors"
+  >
+    Choose A Clip
+  </button>
+  <input 
+    type="file" 
+    id="videoUpload" 
+    name="video_clip" 
+    accept="video/*" 
+    class="hidden" 
+    onchange="updateFileName(this)"
+  >
+  <p id="fileName" class="text-center text-zinc-600 text-sm font-bold leading-relaxed tracking-wide"></p>
+  <p class="text-center text-zinc-600 text-sm font-bold leading-relaxed tracking-wide">
+    Please submit unedited clips<br>without text or music
+  </p>
+</div>
+          <!-- Paste Link Section -->
+          <div id="pasteLinkSection" class="hidden w-full">
+            <input 
+              type="text" 
+              name="clip_link" 
+              placeholder="Paste your clip link here"
+              class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 text-base"
+            >
+            <p class="text-center text-zinc-600 text-sm font-bold leading-relaxed tracking-wide mt-2">
+              Supported platforms: <br> YouTube, TikTok, Instagram
+            </p>
+          </div>
+        </div>
+
+        <!-- Guidelines -->
+        <div class="text-sm font-bold leading-relaxed space-y-4">
+ <p class="text-black tracking-wide">Don't submit clips that:</p>
+          <ul class="text-zinc-600 space-y-2 tracking-wide">
+            <li>1. Aren't yours</li>
+            <li>2. Include music or text</li>
+            <li>3. Violate copyright laws</li>
+            <li>4. Feature graphic violence or nudity</li>
+          </ul>
+        </div>
+
+        <!-- Location Field -->
+        <div>
+          <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3 mt-3">Where was this filmed?</label>
+          <input 
+            type="text" 
+            name="location" 
+            placeholder="Los Angeles, CA"
+            class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+          >
+        </div>
+
+        <!-- Toggle Groups -->
+        <div class="space-y-6">
+          <!-- Description Toggle -->
+          <div class="flex flex-col gap-3">
+            <label class="text-zinc-900 font-bold text-base tracking-wide">
+              Add clip description? (optional)
+            </label>
+            <div class="inline-flex w-32 rounded-lg overflow-hidden" id="descriptionToggle">
+              <button 
+                type="button" 
+                onclick="toggleOption(document.getElementById('descriptionToggle'), this)"
+                class="flex-1 h-12 bg-white text-black font-bold border-2 border-neutral-200 text-base tracking-wide"
+              >
+                Yes
+              </button>
+              <button 
+                type="button" 
+                onclick="toggleOption(document.getElementById('descriptionToggle'), this)"
+                class="flex-1 h-12 bg-red-600 text-white font-bold border-2 border-red-600 text-base tracking-wide"
+              >
+                No
+              </button>
+            </div>
+          </div>
+          <!-- Description Information Section -->
+          <div id="descriptionInformationSection" class="hidden p-6 bg-neutral-200 rounded-md space-y-4">
+            <div>
+              <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Clip Description</label>
+              <textarea 
+                name="description" 
+                placeholder="Enter clip description"
+                class="w-full h-24 px-4 py-2 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Recording Toggle -->
+          <div class="flex flex-col gap-3">
+            <label class="text-zinc-900 font-bold text-base tracking-wide">
+              Did you record this clip?
+            </label>
+            <div class="inline-flex w-32 rounded-lg overflow-hidden" id="recordingToggle">
+              <button 
+                type="button" 
+                onclick="toggleOption(document.getElementById('recordingToggle'), this)"
+                class="flex-1 h-12 bg-red-600 text-white font-bold border-2 border-red-600 text-base tracking-wide"
+              >
+                Yes
+              </button>
+              <button 
+                type="button" 
+                onclick="toggleOption(document.getElementById('recordingToggle'), this)"
+                class="flex-1 h-12 bg-white text-black font-bold border-2 border-neutral-200 text-base tracking-wide"
+              >
+                No
+              </button>
+            </div>
+          </div>
+          <!-- Recording Information Section -->
+          <div id="recordingInformationSection" class="hidden p-6 bg-neutral-200 rounded-md space-y-4">
+            <div>
+              <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Who recorded it?</label>
+              <input 
+                type="text" 
+                name="recorder" 
+                placeholder="Enter name of recorder"
+                class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+              >
+            </div>
+          </div>
+
+          <!-- Credit Toggle -->
+          <div class="flex flex-col gap-3">
+            <label class="text-zinc-900 font-bold text-base tracking-wide">
+              Want clip credit? (optional)
+            </label>
+            <div class="inline-flex w-32 rounded-lg overflow-hidden" id="creditToggle">
+              <button 
+                type="button" 
+                onclick="toggleOption(document.getElementById('creditToggle'), this)"
+                class="flex-1 h-12 bg-red-600 text-white font-bold border-2 border-red-600 text-base tracking-wide"
+              >
+                Yes
+              </button>
+              <button 
+                type="button" 
+                onclick ="toggleOption(document.getElementById('creditToggle'), this)"
+                class="flex-1 h-12 bg-white text-black font-bold border-2 border-neutral-200 text-base tracking-wide"
+              >
+                No
+              </button>
+            </div>
+          </div>
+          <!-- Credit Information Section -->
+          <div id="creditInformationSection" class="p-6 bg-neutral-200 rounded-md space-y-4">
+            <div>
+              <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Platform</label>
+              <select name="credit_platform" class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base">
+                <option>Please Select</option>
+                <option>Instagram</option>
+                <option>X (Twitter)</option>
+                <option>YouTube</option>
+                <option>TikTok</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">Handle or Username to credit</label>
+              <input 
+                type="text" 
+                name="credit_handle" 
+                placeholder="example@email.com"
+                class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+              >
+              <p class="text-sm text-zinc-600 font-bold mt-2 tracking-wide">
+                We'd like to give you credit if your clip is featured.
+              </p>
+            </div>
+          </div>
+
+          <!-- PayPal Email -->
+          <div>
+            <label class="block text-zinc-900 font-bold text-base tracking-wide mb-3">PayPal Email</label>
+            <input 
+              type="email" 
+              name="paypal_email" 
+              placeholder="example@email.com"
+              class="w-full h-12 px-4 rounded-lg border-2 border-neutral-200 bg-neutral-100 text-base"
+            >
+          </div>
+
+          <!-- Terms and Agreements -->
+          <div class="text-sm text-zinc-600 font-bold leading-relaxed space-y-4 tracking-wide">
+            <p>
+              By signing, I agree that all information in this form is true and accurate. 
+              I understand I am granting an exclusive license to the content submitted, 
+              and that Pissed may represent this content on my behalf.
+            </p>
+            <p>
+              I also understand that there is no guarantee of revenue unless my content 
+              is commercially licensed to an unaffiliated third party. I have reviewed 
+              and agree to the Contest Rules, Content Submission Agreement, Terms of 
+              Service, and Privacy Policy.
+            </p>
+          </div>
+
+<!-- Checkboxes -->
+<div class="space-y-4">
+  <label class="flex items-start gap-3">
+    <input 
+      type="checkbox" 
+      id="exclusiveAgreement" 
+      class="w-5 h-5 rounded-lg border-2 border-neutral-200 bg-neutral-100"
+      onchange="updateCheckboxState('exclusiveAgreement', this.checked)"
+    >
+    <span class="text-sm text-zinc-600 font-bold tracking-wide">I have not signed any exclusive agreements for this clip with anyone else.</span>
+  </label>
+  <label class="flex items-start gap-3">
+    <input 
+      type="checkbox" 
+      id="clipGuidelines" 
+      class="w-5 h-5 rounded-lg border-2 border-neutral-200 bg-neutral-100"
+      onchange="updateCheckboxState('clipGuidelines', this.checked)"
+    >
+    <span class="text-sm text-zinc-600 font-bold tracking-wide">
+      My clip meets the <span class="underline">Clip Guidelines</span> (does not contain nudity, graphic violence, etc..)
+    </span>
+  </label>
+</div>
+
+          <button type="submit" class="w-full h-12 bg-red-600 text-white font-bold rounded-md text-base tracking-wide hover:bg-red-700 transition-colors">
+            Submit
+          </button>
+        </form>
+      </main>
+
+      <!-- Footer -->
+      <footer class="w-full max-w-md px-6 py-6 bg-zinc-950">
+        <div class="flex justify-center gap-6 sm:gap-8 mb-4">
+          <a href="#" class="text-white text-sm font-bold uppercase tracking-wide hover:text-gray-300 transition-colors">Terms</a>
+          <a href="#" class="text-white text-sm font-bold uppercase tracking-wide hover:text-gray-300 transition-colors">Privacy</a>
+          <a href="#" class="text-white text-sm font-bold uppercase tracking-wide hover:text-gray-300 transition-colors">Instagram</a>
+        </div>
+        <p class="text-center text-white text-sm font-bold tracking-wide">© PISSED</p>
+      </footer>
+    </div>
+  </body>
+</html>
