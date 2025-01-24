@@ -266,7 +266,7 @@ async function sendTelegramNotification(submissionUrl, formData) {
   const videoLinkText = isFileUpload ? 'Uploaded Video' : 'Submitted Video Link';
 
   const message = `
-🔥 Comprehensive Clip Submission 🔥
+🔥 Clip Submission 🔥
 
 👤 <b>Personal Information:</b>
 • First Name: ${formatValue(formData.first_name)}
