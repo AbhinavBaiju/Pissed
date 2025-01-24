@@ -1,0 +1,16 @@
+[build]
+  functions = "functions"
+  publish = "."
+
+[functions]
+  node_bundler = "esbuild"
+
+  [functions.external]
+  external_node_modules = [
+    "dotenv"
+  ]
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
