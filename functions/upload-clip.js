@@ -2,6 +2,55 @@ const { BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCrede
 const fetch = require('node-fetch');
 require('dotenv').config();
 
+// Constants for rate limiting and file size
+const MAX_DAILY_SUBMISSIONS = 35;
+const MAX_VIDEO_SIZE_BYTES = 350 * 1024 * 1024; // 350 MB in bytes
+
+// In-memory submission tracking (can be replaced with Redis for distributed systems)
+const submissionTracker = {};
+
+function isRateLimitExceeded(email) {
+  const now = Date.now();
+  const oneHour = 60 * 60 * 1000;
+  const oneDay = 24 * oneHour;
+
+  // Initialize user tracking if not exists
+  if (!submissionTracker[email]) {
+    submissionTracker[email] = {
+      hourlySubmissions: [],
+      dailySubmissions: []
+    };
+  }
+
+  const userTracker = submissionTracker[email];
+
+  // Clean up old submissions
+  userTracker.hourlySubmissions = userTracker.hourlySubmissions.filter(time => now - time < oneHour);
+  userTracker.dailySubmissions = userTracker.dailySubmissions.filter(time => now - time < oneDay);
+
+  // Check hourly limit (3 submissions per hour)
+  if (userTracker.hourlySubmissions.length >= 3) {
+    return {
+      exceeded: true, 
+      message: 'You can only submit 3 clips per hour. Please try again later.'
+    };
+  }
+
+  // Check daily limit (35 submissions per day)
+  if (userTracker.dailySubmissions.length >= MAX_DAILY_SUBMISSIONS) {
+    return {
+      exceeded: true, 
+      message: `You can only submit ${MAX_DAILY_SUBMISSIONS} clips per day. Please try again tomorrow.`
+    };
+  }
+
+  // If not exceeded, record the submission
+  userTracker.hourlySubmissions.push(now);
+  userTracker.dailySubmissions.push(now);
+
+  return { exceeded: false };
+}
+
 exports.handler = async (event) => {
   // Validate request method
   if (event.httpMethod !== 'POST') {
@@ -27,6 +76,27 @@ exports.handler = async (event) => {
       };
     }
 
+    // Validate email is present
+    if (!formData.email) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          message: 'Email is required for rate limiting' 
+        })
+      };
+    }
+
+    // Check rate limit
+    const rateLimitCheck = isRateLimitExceeded(formData.email);
+    if (rateLimitCheck.exceeded) {
+      return {
+        statusCode: 429, // Too Many Requests
+        body: JSON.stringify({ 
+          message: rateLimitCheck.message 
+        })
+      };
+    }
+
     // Validate agreements
     if (!formData.exclusiveAgreement || !formData.clipGuidelines) {
       return {
@@ -41,6 +111,22 @@ exports.handler = async (event) => {
     const hasFileUpload = formData.fileBase64 && formData.fileBase64 !== 'null';
     const hasClipLink = formData.clip_link && formData.clip_link !== 'null';
 
+    // Validate file size if file upload is present
+    if (hasFileUpload) {
+      // Decode base64 and check file size
+      const fileBuffer = Buffer.from(formData.fileBase64, 'base64');
+      
+      if (fileBuffer.length > MAX_VIDEO_SIZE_BYTES) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ 
+            message: `File size exceeds maximum limit of ${MAX_VIDEO_SIZE_BYTES / (1024 * 1024)} MB`, 
+            maxSizeBytes: MAX_VIDEO_SIZE_BYTES
+          })
+        };
+      }
+    }
+
     if (!hasFileUpload && !hasClipLink) {
       return {
         statusCode: 400,
@@ -51,64 +137,63 @@ exports.handler = async (event) => {
       };
     }
 
-    // If file upload is present, process Azure Blob Storage upload
-    let blobUrl = null;
-    if (hasFileUpload) {
-      // Azure Blob Storage Upload Logic
-      const blobServiceClient = BlobServiceClient.fromConnectionString(
-        process.env.AZURE_STORAGE_CONNECTION_STRING
-      );
-      const containerClient = blobServiceClient.getContainerClient(
-        process.env.AZURE_CONTAINER
-      );
-
-      // Generate unique blob name
-      const sanitizedFileName = (formData.fileName || 'unnamed_clip')
-        .replace(/[^a-zA-Z0-9.-]/g, '_')
-        .substring(0, 100);
-      const blobName = `${Date.now()}_${sanitizedFileName}`;
-      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-
-      // Convert base64 to buffer
-      const fileBuffer = Buffer.from(formData.fileBase64, 'base64');
-      
-      // Upload to Azure Blob Storage
-      await blockBlobClient.upload(fileBuffer, fileBuffer.length);
-
-      // Generate SAS Token
-      blobUrl = await generateSASToken(blobName);
-    }
-
-    // Use clip link if no file upload
-    const submissionUrl = hasFileUpload ? blobUrl : formData.clip_link;
-
-    // Send Telegram Notification
-    try {
-      await sendTelegramNotification(submissionUrl, formData);
-    } catch (telegramError) {
-      console.error('Telegram Notification Error:', telegramError);
-    }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ 
-        message: 'Submission successful', 
-        submissionUrl: submissionUrl 
-      })
-    };
-
-  } catch (error) {
-    console.error('Unexpected Error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ 
-        message: 'Unexpected server error', 
-        error: error.message 
-      })
-    };
-  }
-};
-
+        // If file upload is present, process Azure Blob Storage upload
+        let blobUrl = null;
+        if (hasFileUpload) {
+          // Azure Blob Storage Upload Logic
+          const blobServiceClient = BlobServiceClient.fromConnectionString(
+            process.env.AZURE_STORAGE_CONNECTION_STRING
+          );
+          const containerClient = blobServiceClient.getContainerClient(
+            process.env.AZURE_CONTAINER
+          );
+    
+          // Generate unique blob name
+          const sanitizedFileName = (formData.fileName || 'unnamed_clip')
+            .replace(/[^a-zA-Z0-9.-]/g, '_')
+            .substring(0, 100);
+          const blobName = `${Date.now()}_${sanitizedFileName}`;
+          const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    
+          // Convert base64 to buffer
+          const fileBuffer = Buffer.from(formData.fileBase64, 'base64');
+          
+          // Upload to Azure Blob Storage
+          await blockBlobClient.upload(fileBuffer, fileBuffer.length);
+    
+          // Generate SAS Token
+          blobUrl = await generateSASToken(blobName);
+        }
+    
+        // Use clip link if no file upload
+        const submissionUrl = hasFileUpload ? blobUrl : formData.clip_link;
+    
+        // Send Telegram Notification
+        try {
+          await sendTelegramNotification(submissionUrl, formData);
+        } catch (telegramError) {
+          console.error('Telegram Notification Error:', telegramError);
+        }
+    
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ 
+            message: 'Submission successful', 
+            submissionUrl: submissionUrl 
+          })
+        };
+    
+      } catch (error) {
+        console.error('Unexpected Error:', error);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ 
+            message: 'Unexpected server error', 
+            error: error.message 
+          })
+        };
+      }
+    };    
 
 async function generateSASToken(blobName) {
   // Extract account key from connection string
